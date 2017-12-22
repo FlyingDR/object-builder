@@ -8,6 +8,7 @@ use Flying\ObjectBuilder\Handler\TypeConverter\DefaultTypeConverter;
 use Flying\ObjectBuilder\Handler\ValueAssigner\DefaultValueAssigner;
 use Flying\ObjectBuilder\ObjectBuilder;
 use Flying\ObjectBuilder\ObjectBuilderInterface;
+use Flying\ObjectBuilder\Registry\HandlersRegistry;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\BuilderAwareHandlerTypeProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\PrioritizedTypeProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ScalarTypes;
@@ -69,18 +70,18 @@ class ObjectBuilderTest extends TestCase
             });
 
         $calls = [];
-        $builder = new ObjectBuilder([
+        $builder = new ObjectBuilder(new HandlersRegistry([
             $h1->reveal(),
             $h2->reveal(),
-        ]);
+        ]));
         $builder->build(\stdClass::class, ['a' => true]);
         $this->assertEquals([2, 1], $calls);
 
         $calls = [];
-        $builder = new ObjectBuilder([
+        $builder = new ObjectBuilder(new HandlersRegistry([
             $h2->reveal(),
             $h1->reveal(),
-        ]);
+        ]));
         $builder->build(\stdClass::class, ['a' => true]);
         $this->assertEquals([2, 1], $calls);
     }
@@ -108,10 +109,10 @@ class ObjectBuilderTest extends TestCase
                 return false;
             });
 
-        $builder = new ObjectBuilder([
+        $builder = new ObjectBuilder(new HandlersRegistry([
             $h1->reveal(),
             $h2->reveal(),
-        ]);
+        ]));
         $builder->build(\stdClass::class, ['a' => true]);
         $this->assertEquals([1, 2], $calls);
     }
@@ -128,9 +129,9 @@ class ObjectBuilderTest extends TestCase
             ->canGetTarget(Argument::type(\ReflectionClass::class))
             ->shouldBeCalled()
             ->willReturn(false);
-        $builder = new ObjectBuilder([
+        $builder = new ObjectBuilder(new HandlersRegistry([
             $handler->reveal(),
-        ]);
+        ]));
         $builder->build(\stdClass::class, ['a' => true]);
         $calls = $handler->findProphecyMethodCalls('setBuilder', new Argument\ArgumentsWildcard([Argument::type(ObjectBuilder::class)]));
         $this->assertCount(1, $calls);
@@ -144,12 +145,10 @@ class ObjectBuilderTest extends TestCase
      */
     public function getTestBuilder(): ObjectBuilderInterface
     {
-        return new ObjectBuilder([
+        return new ObjectBuilder(new HandlersRegistry([
             new DefaultTargetProvider(),
-        ], [
             new DefaultTypeConverter(),
-        ], [
             new DefaultValueAssigner(),
-        ]);
+        ]));
     }
 }

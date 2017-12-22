@@ -3,10 +3,11 @@
 namespace Flying\ObjectBuilder;
 
 use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
-use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
+use Flying\ObjectBuilder\Registry\HandlersList;
+use Flying\ObjectBuilder\Registry\HandlersRegistryInterface;
 
 class ObjectBuilder implements ObjectBuilderInterface
 {
@@ -40,36 +41,21 @@ class ObjectBuilder implements ObjectBuilderInterface
     private $assigners;
 
     /**
-     * @param TargetProviderInterface[] $providers
-     * @param TypeConverterInterface[] $converters
-     * @param ValueAssignerInterface[] $assigners
+     * @param HandlersRegistryInterface $handlers
      */
-    public function __construct(array $providers = [], array $converters = [], array $assigners = [])
+    public function __construct(HandlersRegistryInterface $handlers)
     {
-        $sorter = function ($a, $b) {
-            $ap = $a instanceof PrioritizedHandlerInterface ? $a->getPriority() : 0;
-            $bp = $b instanceof PrioritizedHandlerInterface ? $b->getPriority() : 0;
-            if ($ap > $bp) {
-                return -1;
-            }
-            if ($ap < $bp) {
-                return 1;
-            }
-            return 0;
-        };
-        $init = function (&$target, array $items) use ($sorter) {
-            foreach ($items as $item) {
-                if ($item instanceof ObjectBuilderAwareHandlerInterface) {
-                    $item->setBuilder($this);
+        $init = function (HandlersList $handlers, &$target) {
+            foreach ($handlers as $handler) {
+                if ($handler instanceof ObjectBuilderAwareHandlerInterface) {
+                    $handler->setBuilder($this);
                 }
             }
-            usort($items, $sorter);
-            $target = $items;
+            $target = $handlers->toArray();
         };
-
-        $init($this->providers, $providers);
-        $init($this->converters, $converters);
-        $init($this->assigners, $assigners);
+        $init($handlers->getHandlers(TargetProviderInterface::class), $this->providers);
+        $init($handlers->getHandlers(TypeConverterInterface::class), $this->converters);
+        $init($handlers->getHandlers(ValueAssignerInterface::class), $this->assigners);
     }
 
     /**
@@ -139,6 +125,7 @@ class ObjectBuilder implements ObjectBuilderInterface
                 throw new \InvalidArgumentException(sprintf('Data item "%s" can\'t be assigned to class "%s"', $key, $class));
             }
 
+            // Attempt to convert data value into type that is expected by object, being built
             foreach ($this->converters as $converter) {
                 try {
                     if (!$converter->canConvert($target, $value)) {
@@ -154,6 +141,7 @@ class ObjectBuilder implements ObjectBuilderInterface
                 }
             }
 
+            // Attempt to assign object value to the object
             $assigned = false;
             foreach ($this->assigners as $assigner) {
                 try {
@@ -169,7 +157,7 @@ class ObjectBuilder implements ObjectBuilderInterface
                 }
             }
             if (!$assigned && $strict) {
-                throw new \InvalidArgumentException(sprintf('Failed to assign data item "%s" class "%s"', $key, $class));
+                throw new \InvalidArgumentException(sprintf('Failed to assign object data item "%s" to object "%s"', $key, $class));
             }
         }
 
