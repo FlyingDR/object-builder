@@ -1,12 +1,12 @@
 <?php
 
-namespace Flying\ObjectBuilder\Tests\Fixtures\TargetProvider;
+namespace Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider;
 
-use Flying\ObjectBuilder\ObjectBuilderAwareInterface;
+use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
+use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\ObjectBuilderInterface;
-use Flying\ObjectBuilder\TargetProvider\TargetProviderInterface;
 
-class BuilderAwareTypeProvider implements TargetProviderInterface, ObjectBuilderAwareInterface
+class BuilderAwareHandlerTypeProvider implements TargetProviderInterface, ObjectBuilderAwareHandlerInterface
 {
     /**
      * {@inheritdoc}

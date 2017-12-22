@@ -2,16 +2,16 @@
 
 namespace Flying\ObjectBuilder\Tests;
 
+use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
+use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
+use Flying\ObjectBuilder\Handler\TypeConverter\DefaultTypeConverter;
+use Flying\ObjectBuilder\Handler\ValueAssigner\DefaultValueAssigner;
 use Flying\ObjectBuilder\ObjectBuilder;
 use Flying\ObjectBuilder\ObjectBuilderInterface;
-use Flying\ObjectBuilder\TargetProvider\DefaultTargetProvider;
-use Flying\ObjectBuilder\TargetProvider\TargetProviderInterface;
-use Flying\ObjectBuilder\Tests\Fixtures\TargetProvider\BuilderAwareTypeProvider;
-use Flying\ObjectBuilder\Tests\Fixtures\TargetProvider\PrioritizedTypeProvider;
+use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\BuilderAwareHandlerTypeProvider;
+use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\PrioritizedTypeProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ScalarTypes;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\TestObjectInterface;
-use Flying\ObjectBuilder\TypeConverter\DefaultTypeConverter;
-use Flying\ObjectBuilder\ValueAssigner\DefaultValueAssigner;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Call\Call;
@@ -118,7 +118,7 @@ class ObjectBuilderTest extends TestCase
 
     public function testObjectBuilderAwareHandlersShouldGetInstanceOfBuilder()
     {
-        $handler = $this->prophesize(BuilderAwareTypeProvider::class);
+        $handler = $this->prophesize(BuilderAwareHandlerTypeProvider::class);
         /** @noinspection PhpParamsInspection, NullPointerExceptionInspection */
         $handler
             ->setBuilder(Argument::type(ObjectBuilder::class))

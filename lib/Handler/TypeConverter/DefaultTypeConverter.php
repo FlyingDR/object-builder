@@ -1,8 +1,8 @@
 <?php
 
-namespace Flying\ObjectBuilder\TypeConverter;
+namespace Flying\ObjectBuilder\Handler\TypeConverter;
 
-use Flying\ObjectBuilder\PrioritizedHandlerInterface;
+use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
 
 /**
  * Default implementation of type converter for object builder

@@ -1,8 +1,8 @@
 <?php
 
-namespace Flying\ObjectBuilder\ValueAssigner;
+namespace Flying\ObjectBuilder\Handler\ValueAssigner;
 
-use Flying\ObjectBuilder\PrioritizedHandlerInterface;
+use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
 
 /**
  * Default implementation of value assigner for object builder

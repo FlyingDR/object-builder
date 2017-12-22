@@ -1,11 +1,13 @@
 <?php
 
-namespace Flying\ObjectBuilder\TypeConverter;
+namespace Flying\ObjectBuilder\Handler\TypeConverter;
+
+use Flying\ObjectBuilder\Handler\HandlerInterface;
 
 /**
  * Interface for type converters for object builder
  */
-interface TypeConverterInterface
+interface TypeConverterInterface extends HandlerInterface
 {
     /**
      * Determine if this converter is able to convert given value into given type

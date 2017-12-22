@@ -1,11 +1,13 @@
 <?php
 
-namespace Flying\ObjectBuilder\TargetProvider;
+namespace Flying\ObjectBuilder\Handler\TargetProvider;
+
+use Flying\ObjectBuilder\Handler\HandlerInterface;
 
 /**
  * Interface for object builder handlers that are responsible for resolving targets for assigning values to given object
  */
-interface TargetProviderInterface
+interface TargetProviderInterface extends HandlerInterface
 {
     /**
      * Decide if this handler will be able to provide targets for given class

@@ -1,9 +1,9 @@
 <?php
 
-namespace Flying\ObjectBuilder\Tests\Fixtures\TargetProvider;
+namespace Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider;
 
-use Flying\ObjectBuilder\PrioritizedHandlerInterface;
-use Flying\ObjectBuilder\TargetProvider\TargetProviderInterface;
+use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
+use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 
 class PrioritizedTypeProvider implements TargetProviderInterface, PrioritizedHandlerInterface
 {

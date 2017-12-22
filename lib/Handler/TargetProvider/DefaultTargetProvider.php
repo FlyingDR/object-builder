@@ -1,8 +1,8 @@
 <?php
 
-namespace Flying\ObjectBuilder\TargetProvider;
+namespace Flying\ObjectBuilder\Handler\TargetProvider;
 
-use Flying\ObjectBuilder\PrioritizedHandlerInterface;
+use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
 
 /**
  * Default implementation of target provider for object builder

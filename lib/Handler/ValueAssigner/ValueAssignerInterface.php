@@ -1,11 +1,13 @@
 <?php
 
-namespace Flying\ObjectBuilder\ValueAssigner;
+namespace Flying\ObjectBuilder\Handler\ValueAssigner;
+
+use Flying\ObjectBuilder\Handler\HandlerInterface;
 
 /**
  * Interface for value assigners for object builder
  */
-interface ValueAssignerInterface
+interface ValueAssignerInterface extends HandlerInterface
 {
     /**
      * Determine if this value assigner is able to assign given value to given target

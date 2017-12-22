@@ -2,9 +2,11 @@
 
 namespace Flying\ObjectBuilder;
 
-use Flying\ObjectBuilder\TargetProvider\TargetProviderInterface;
-use Flying\ObjectBuilder\TypeConverter\TypeConverterInterface;
-use Flying\ObjectBuilder\ValueAssigner\ValueAssignerInterface;
+use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
+use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
+use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
+use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
+use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
 
 class ObjectBuilder implements ObjectBuilderInterface
 {
@@ -57,7 +59,7 @@ class ObjectBuilder implements ObjectBuilderInterface
         };
         $init = function (&$target, array $items) use ($sorter) {
             foreach ($items as $item) {
-                if ($item instanceof ObjectBuilderAwareInterface) {
+                if ($item instanceof ObjectBuilderAwareHandlerInterface) {
                     $item->setBuilder($this);
                 }
             }

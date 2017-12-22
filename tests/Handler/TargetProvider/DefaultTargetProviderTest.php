@@ -1,8 +1,8 @@
 <?php
 
-namespace Flying\ObjectBuilder\Tests\TargetProvider;
+namespace Flying\ObjectBuilder\Tests\Handler\TargetProvider;
 
-use Flying\ObjectBuilder\TargetProvider\DefaultTargetProvider;
+use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
 use PHPUnit\Framework\TestCase;
 
 class DefaultTargetProviderTest extends TestCase

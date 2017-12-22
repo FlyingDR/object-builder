@@ -1,11 +1,11 @@
 <?php
 
-namespace Flying\ObjectBuilder;
+namespace Flying\ObjectBuilder\Handler;
 
 /**
  * Interface for object builder handlers that can define their priority
  */
-interface PrioritizedHandlerInterface
+interface PrioritizedHandlerInterface extends HandlerInterface
 {
     /**
      * Get priority of this handler
