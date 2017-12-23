@@ -16,23 +16,6 @@ use PHPUnit\Framework\TestCase;
 
 class HandlersRegistryTest extends TestCase
 {
-    public function testRegistryHaveListsForAllHandlerTypesByDefault()
-    {
-        $types = [
-            TargetProviderInterface::class,
-            TypeConverterInterface::class,
-            ValueAssignerInterface::class,
-        ];
-        $registry = new HandlersRegistry();
-        $handlers = $registry->getHandlers();
-        $this->assertTrue(\is_array($handlers));
-        $this->assertEquals(\count($types), \count($handlers));
-        $this->assertEquals($types, array_keys($handlers));
-        foreach ($handlers as $list) {
-            $this->assertInstanceOf(HandlersListInterface::class, $list);
-        }
-    }
-
     public function testRequestForSingleTypeReturnsSingleList()
     {
         $registry = new HandlersRegistry();

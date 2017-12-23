@@ -2,6 +2,7 @@
 
 namespace Flying\ObjectBuilder\Registry;
 
+use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
@@ -25,9 +26,6 @@ class HandlersRegistry implements HandlersRegistryInterface
     public function __construct($handlers = null)
     {
         $this->handlers = [];
-        foreach (self::$handlerTypes as $type) {
-            $this->handlers[$type] = new HandlersList($type);
-        }
         if ($handlers !== null) {
             $this->addHandlers($handlers);
         }
@@ -56,17 +54,20 @@ class HandlersRegistry implements HandlersRegistryInterface
                 $this->addHandlers($handler->toArray());
                 continue;
             }
-            $assigned = false;
-            foreach (self::$handlerTypes as $type) {
-                if (is_subclass_of($handler, $type)) {
-                    $this->handlers[$type]->add($handler);
-                    $assigned = true;
-                    break;
-                }
+
+            if (!$handler instanceof HandlerInterface) {
+                throw new \InvalidArgumentException(sprintf('Object builder handler "%s" should implement HandlerInterface', \get_class($handler)));
             }
-            if (!$assigned) {
-                throw new \InvalidArgumentException(sprintf('Unknown object builder handlers type "%s"', (new \ReflectionObject($handler))->getShortName()));
+            $type = array_reduce(self::$handlerTypes, function ($result, $type) use ($handler) {
+                return is_subclass_of($handler, $type) ? $type : $result;
+            });
+            if (!$type) {
+                throw new \InvalidArgumentException(sprintf('Unknown object builder handler type "%s"', \get_class($handler)));
             }
+            if (!array_key_exists($type, $this->handlers)) {
+                $this->handlers[$type] = new HandlersList($type);
+            }
+            $this->handlers[$type]->add($handler);
         }
     }
 
@@ -79,9 +80,12 @@ class HandlersRegistry implements HandlersRegistryInterface
         if ($type === null) {
             return $this->handlers;
         }
-        if (array_key_exists($type, $this->handlers)) {
-            return $this->handlers[$type];
+        if (!\in_array($type, self::$handlerTypes, true)) {
+            throw new \InvalidArgumentException(sprintf('Unknown object builder handlers type "%s"', $type));
         }
-        throw new \InvalidArgumentException(sprintf('Unknown object builder handlers type "%s"', $type));
+        if (!array_key_exists($type, $this->handlers)) {
+            $this->handlers[$type] = new HandlersList($type);
+        }
+        return $this->handlers[$type];
     }
 }
