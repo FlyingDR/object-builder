@@ -62,16 +62,20 @@ class HandlersRegistry implements HandlersRegistryInterface
             if (!$handler instanceof HandlerInterface) {
                 throw new \InvalidArgumentException(sprintf('Object builder handler "%s" should implement HandlerInterface', \get_class($handler)));
             }
-            $type = array_reduce(self::$handlerTypes, function ($result, $type) use ($handler) {
-                return is_subclass_of($handler, $type) ? $type : $result;
-            });
-            if (!$type) {
+            $assigned = false;
+            foreach (self::$handlerTypes as $type) {
+                if (!is_subclass_of($handler, $type)) {
+                    continue;
+                }
+                if (!array_key_exists($type, $this->handlers)) {
+                    $this->handlers[$type] = new HandlersList($type);
+                }
+                $this->handlers[$type]->add($handler);
+                $assigned = true;
+            }
+            if (!$assigned) {
                 throw new \InvalidArgumentException(sprintf('Unknown object builder handler type "%s"', \get_class($handler)));
             }
-            if (!array_key_exists($type, $this->handlers)) {
-                $this->handlers[$type] = new HandlersList($type);
-            }
-            $this->handlers[$type]->add($handler);
         }
     }
 

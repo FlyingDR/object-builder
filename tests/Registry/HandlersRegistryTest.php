@@ -2,6 +2,8 @@
 
 namespace Flying\ObjectBuilder\Tests\Registry;
 
+use Flying\ObjectBuilder\Handler\DataProcessor\DataProcessorInterface;
+use Flying\ObjectBuilder\Handler\ObjectConstructor\ObjectConstructorInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\DefaultTypeConverter;
@@ -12,6 +14,7 @@ use Flying\ObjectBuilder\Registry\HandlersList;
 use Flying\ObjectBuilder\Registry\HandlersListInterface;
 use Flying\ObjectBuilder\Registry\HandlersRegistry;
 use Flying\ObjectBuilder\Registry\HandlersRegistryInterface;
+use Flying\ObjectBuilder\Tests\Registry\Fixtures\UniversalHandler;
 use PHPUnit\Framework\TestCase;
 
 class HandlersRegistryTest extends TestCase
@@ -134,7 +137,6 @@ class HandlersRegistryTest extends TestCase
         $test($registry);
     }
 
-
     public function testSettingMultipleHandlersAsRegistryArray()
     {
         $h1 = new DefaultTargetProvider();
@@ -159,6 +161,26 @@ class HandlersRegistryTest extends TestCase
 
         $registry = new HandlersRegistry();
         $registry->addHandlers($handlers);
+        $test($registry);
+    }
+
+    public function testHandlerThatImplementsMultipleTypesShouldBeAssignedToAllAppropriateLists()
+    {
+        $handler = new UniversalHandler();
+
+        $test = function (HandlersRegistryInterface $registry) {
+            $this->assertCount(1, $registry->getHandlers(DataProcessorInterface::class));
+            $this->assertCount(1, $registry->getHandlers(ObjectConstructorInterface::class));
+            $this->assertCount(1, $registry->getHandlers(TargetProviderInterface::class));
+            $this->assertCount(1, $registry->getHandlers(TypeConverterInterface::class));
+            $this->assertCount(1, $registry->getHandlers(ValueAssignerInterface::class));
+        };
+
+        $registry = new HandlersRegistry($handler);
+        $test($registry);
+
+        $registry = new HandlersRegistry();
+        $registry->addHandlers($handler);
         $test($registry);
     }
 
