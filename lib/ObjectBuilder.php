@@ -6,23 +6,12 @@ use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
+use Flying\ObjectBuilder\ReflectionCache\ReflectionCache;
 use Flying\ObjectBuilder\Registry\HandlersList;
 use Flying\ObjectBuilder\Registry\HandlersRegistryInterface;
 
 class ObjectBuilder implements ObjectBuilderInterface
 {
-    /**
-     * @var \ReflectionClass[]
-     */
-    private $reflections = [];
-    /**
-     * @var array
-     */
-    private $methods = [];
-    /**
-     * @var array
-     */
-    private $properties = [];
     /**
      * @var array
      */
@@ -64,7 +53,7 @@ class ObjectBuilder implements ObjectBuilderInterface
      */
     public function build(string $class, array $data = [], $strict = false)
     {
-        $reflection = $this->getReflection($class);
+        $reflection = ReflectionCache::getReflection($class);
         // Prepare list of resolved mappings for this class to be cached
         if (!array_key_exists($class, $this->targetsCache)) {
             $this->targetsCache[$class] = [];
@@ -75,8 +64,8 @@ class ObjectBuilder implements ObjectBuilderInterface
         $providers = array_filter($this->providers, function (TargetProviderInterface $provider) use ($reflection) {
             return $provider->canGetTarget($reflection);
         });
-        $methods = $this->getMethods($reflection);
-        $properties = $this->getProperties($reflection);
+        $methods = ReflectionCache::getMethods($reflection);
+        $properties = ReflectionCache::getProperties($reflection);
 
         $object = new $class();
 
@@ -162,75 +151,5 @@ class ObjectBuilder implements ObjectBuilderInterface
         }
 
         return $object;
-    }
-
-    /**
-     * Get class reflection for given class name
-     *
-     * @param string $class
-     * @return \ReflectionClass
-     * @throws \InvalidArgumentException
-     */
-    protected function getReflection(string $class): \ReflectionClass
-    {
-        if (!array_key_exists($class, $this->reflections)) {
-            try {
-                $reflection = new \ReflectionClass($class);
-            } /** @noinspection PhpRedundantCatchClauseInspection */ catch (\ReflectionException $e) {
-                throw new \InvalidArgumentException(sprintf('Failed to create reflection for class "%s", it probably doesn\'t exists', $class));
-            }
-            $this->reflections[$class] = $reflection;
-        }
-        return $this->reflections[$class];
-    }
-
-    /**
-     * Get list of method reflections for given class reflection
-     *
-     * @param \ReflectionClass $reflection
-     * @return \ReflectionMethod[]
-     */
-    protected function getMethods(\ReflectionClass $reflection): array
-    {
-        $class = $reflection->name;
-        if (!array_key_exists($class, $this->methods)) {
-            // Create list of methods that we have in this class
-            $methods = [];
-            do {
-                foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-                    if (!array_key_exists($method->getName(), $methods) && !$method->isAbstract()) {
-                        $methods[$method->getName()] = $method;
-                    }
-                }
-                $reflection = $reflection->getParentClass();
-            } while ($reflection);
-            $this->methods[$class] = $methods;
-        }
-        return $this->methods[$class];
-    }
-
-    /**
-     * Get list of property reflections for given class reflection
-     *
-     * @param \ReflectionClass $reflection
-     * @return \ReflectionProperty[]
-     */
-    protected function getProperties(\ReflectionClass $reflection): array
-    {
-        $class = $reflection->name;
-        if (!array_key_exists($class, $this->properties)) {
-            // Create list of properties that we have in this class
-            $properties = [];
-            do {
-                foreach ($reflection->getProperties() as $property) {
-                    if (!array_key_exists($property->getName(), $properties)) {
-                        $properties[$property->getName()] = $property;
-                    }
-                }
-                $reflection = $reflection->getParentClass();
-            } while ($reflection);
-            $this->properties[$class] = $properties;
-        }
-        return $this->properties[$class];
     }
 }
