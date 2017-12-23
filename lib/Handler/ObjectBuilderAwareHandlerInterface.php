@@ -7,7 +7,7 @@ use Flying\ObjectBuilder\ObjectBuilderInterface;
 /**
  * Interface for object builder handler that needs reference to builder instance
  */
-interface ObjectBuilderAwareHandlerInterface
+interface ObjectBuilderAwareHandlerInterface extends HandlerInterface
 {
     /**
      * Set instance of object builder
