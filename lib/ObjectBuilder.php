@@ -43,10 +43,6 @@ class ObjectBuilder implements ObjectBuilderInterface
         $options = $this->getOptions($options);
         try {
             $reflection = ReflectionCache::getReflection($class);
-            // Prepare list of resolved mappings for this class to be cached
-            if (!array_key_exists($class, $this->targetsCache)) {
-                $this->targetsCache[$class] = [];
-            }
 
             // Pre-process given object data
             /** @var DataProcessorInterface[] $processors */
@@ -86,12 +82,24 @@ class ObjectBuilder implements ObjectBuilderInterface
             if (!\is_object($object)) {
                 throw new \InvalidArgumentException(sprintf('Failed to create instance of "%s" object', $class));
             }
+            // It is possible that actual object instance is not the same as class name, initially passed to object builder
+            // for example in a case if object builder receives name of interface and custom object constructor creates
+            // instance of some particular object that implements this interface. We need to update class name and its reflection
+            // so they will match actual object instance
+            /** @var object $object */
+            $class = \get_class($object);
+            $reflection = ReflectionCache::getReflection($class);
 
             // Prepare list target providers that can handle our class
             /** @var TargetProviderInterface[] $providers */
             $providers = array_filter($this->getHandlers(TargetProviderInterface::class), function (TargetProviderInterface $provider) use ($reflection) {
                 return $provider->canGetTarget($reflection);
             });
+
+            // Prepare list of resolved mappings for this class to be cached
+            if (!array_key_exists($class, $this->targetsCache)) {
+                $this->targetsCache[$class] = [];
+            }
 
             // Assign data to the object
             foreach ($data as $key => $value) {
