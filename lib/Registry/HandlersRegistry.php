@@ -2,7 +2,6 @@
 
 namespace Flying\ObjectBuilder\Registry;
 
-use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
@@ -20,7 +19,7 @@ class HandlersRegistry implements HandlersRegistryInterface
     private $handlers;
 
     /**
-     * @param HandlerInterface|HandlerInterface[]|HandlersListInterface|HandlersListInterface[]|null $handlers
+     * {@inheritdoc}
      * @throws \InvalidArgumentException
      */
     public function __construct($handlers = null)
@@ -40,18 +39,21 @@ class HandlersRegistry implements HandlersRegistryInterface
      */
     public function addHandlers($handlers): void
     {
-        if ($handlers instanceof HandlersListInterface) {
-            $handlers = $handlers->toArray();
-        }
-        if ($handlers instanceof HandlerInterface) {
+        if (!\is_array($handlers)) {
             $handlers = [$handlers];
         }
         foreach ((array)$handlers as $handler) {
             if (!\is_object($handler)) {
                 throw new \InvalidArgumentException(sprintf('Only objects are accepted as handlers, "%s" given', \gettype($handler)));
             }
+            if ($handler instanceof HandlersRegistryInterface) {
+                foreach ($handler->getHandlers() as $list) {
+                    $this->addHandlers($list);
+                }
+                continue;
+            }
             if ($handler instanceof HandlersListInterface) {
-                $this->addHandlers($handler);
+                $this->addHandlers($handler->toArray());
                 continue;
             }
             $assigned = false;

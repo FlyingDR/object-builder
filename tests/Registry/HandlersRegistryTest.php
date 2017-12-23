@@ -91,6 +91,33 @@ class HandlersRegistryTest extends TestCase
         $this->assertCount(0, $registry->getHandlers(ValueAssignerInterface::class));
     }
 
+    public function testSettingMultipleHandlersAsRegistry()
+    {
+        $h1 = new DefaultTargetProvider();
+        $h2 = new DefaultTargetProvider();
+        $r = new HandlersRegistry([$h1, $h2]);
+        $registry = new HandlersRegistry($r);
+        $this->assertCount(2, $registry->getHandlers(TargetProviderInterface::class));
+        $this->assertCount(0, $registry->getHandlers(TypeConverterInterface::class));
+        $this->assertCount(0, $registry->getHandlers(ValueAssignerInterface::class));
+    }
+
+
+    public function testSettingMultipleHandlersAsRegistryArray()
+    {
+        $h1 = new DefaultTargetProvider();
+        $h2 = new DefaultTargetProvider();
+        $r1 = new HandlersRegistry([$h1, $h2]);
+        $h3 = new DefaultTypeConverter();
+        $h4 = new DefaultTypeConverter();
+        $h5 = new DefaultTypeConverter();
+        $r2 = new HandlersRegistry([$h3, $h4, $h5]);
+        $registry = new HandlersRegistry([$r1, $r2]);
+        $this->assertCount(2, $registry->getHandlers(TargetProviderInterface::class));
+        $this->assertCount(3, $registry->getHandlers(TypeConverterInterface::class));
+        $this->assertCount(0, $registry->getHandlers(ValueAssignerInterface::class));
+    }
+
     /**
      * @param mixed $handlers
      * @expectedException \InvalidArgumentException

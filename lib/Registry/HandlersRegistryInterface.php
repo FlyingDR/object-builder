@@ -10,14 +10,14 @@ use Flying\ObjectBuilder\Handler\HandlerInterface;
 interface HandlersRegistryInterface
 {
     /**
-     * @param HandlerInterface|HandlerInterface[]|HandlersListInterface|HandlersListInterface[]|null $handlers
+     * @param HandlerInterface|HandlerInterface[]|HandlersListInterface|HandlersListInterface[]|HandlersRegistryInterface|HandlersRegistryInterface[]|null $handlers
      */
     public function __construct($handlers = null);
 
     /**
      * Add given object builder handlers to handlers registry
      *
-     * @param HandlerInterface|HandlerInterface[]|HandlersListInterface|HandlersListInterface[] $handlers
+     * @param HandlerInterface|HandlerInterface[]|HandlersListInterface|HandlersListInterface[]|HandlersRegistryInterface|HandlersRegistryInterface[] $handlers
      */
     public function addHandlers($handlers): void;
 
