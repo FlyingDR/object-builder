@@ -12,7 +12,7 @@ class DefaultValueAssigner implements ValueAssignerInterface, PrioritizedHandler
     /**
      * {@inheritdoc}
      */
-    public function canAssign($target, \Reflector $reflection, $value): bool
+    public function canAssign($object, \Reflector $target, $value): bool
     {
         return true;
     }
@@ -20,15 +20,15 @@ class DefaultValueAssigner implements ValueAssignerInterface, PrioritizedHandler
     /**
      * {@inheritdoc}
      */
-    public function assign($target, \Reflector $reflection, $value): bool
+    public function assign($object, \Reflector $target, $value): bool
     {
-        if ($reflection instanceof \ReflectionMethod) {
-            $reflection->invoke($target, $value);
+        if ($target instanceof \ReflectionMethod) {
+            $target->invoke($object, $value);
             return true;
         }
 
-        if ($reflection instanceof \ReflectionProperty) {
-            $reflection->setValue($target, $value);
+        if ($target instanceof \ReflectionProperty) {
+            $target->setValue($object, $value);
             return true;
         }
 

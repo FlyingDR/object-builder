@@ -27,22 +27,22 @@ class ChildObjectConverter implements TypeConverterInterface, ObjectBuilderAware
     /**
      * {@inheritdoc}
      */
-    public function canConvert(\Reflector $reflection, array $data, string $key): bool
+    public function canConvert(\Reflector $target, array $data, string $key): bool
     {
-        if (!($reflection instanceof \ReflectionMethod) || $reflection->getNumberOfParameters() !== 1) {
+        if (!($target instanceof \ReflectionMethod) || $target->getNumberOfParameters() !== 1) {
             return false;
         }
-        $class = (string)$reflection->getParameters()[0]->getType();
+        $class = (string)$target->getParameters()[0]->getType();
         return \is_array($data[$key]) && class_exists($class);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function convert(\Reflector $reflection, array $data, string $key)
+    public function convert(\Reflector $target, array $data, string $key)
     {
-        /** @var \ReflectionMethod $reflection */
-        $class = (string)$reflection->getParameters()[0]->getType();
+        /** @var \ReflectionMethod $target */
+        $class = (string)$target->getParameters()[0]->getType();
         try {
             return $this->builder->build($class, $data[$key]);
         } catch (\Exception $e) {

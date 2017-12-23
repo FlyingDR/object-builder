@@ -12,22 +12,22 @@ class DefaultTypeConverter implements TypeConverterInterface, PrioritizedHandler
     /**
      * {@inheritdoc}
      */
-    public function canConvert(\Reflector $reflection, array $data, string $key): bool
+    public function canConvert(\Reflector $target, array $data, string $key): bool
     {
-        if (!($reflection instanceof \ReflectionMethod) || $reflection->getNumberOfParameters() !== 1) {
+        if (!($target instanceof \ReflectionMethod) || $target->getNumberOfParameters() !== 1) {
             return false;
         }
 
-        return \in_array((string)$reflection->getParameters()[0]->getType(), [null, 'bool', 'boolean', 'int', 'integer', 'float', 'double', 'string'], true);
+        return \in_array((string)$target->getParameters()[0]->getType(), [null, 'bool', 'boolean', 'int', 'integer', 'float', 'double', 'string'], true);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function convert(\Reflector $reflection, array $data, string $key)
+    public function convert(\Reflector $target, array $data, string $key)
     {
-        /** @var \ReflectionMethod $reflection */
-        $type = $reflection->getParameters()[0]->getType();
+        /** @var \ReflectionMethod $target */
+        $type = $target->getParameters()[0]->getType();
         $value = $data[$key];
         if ($type === null) {
             // No explicit type is assigned to argument at given method

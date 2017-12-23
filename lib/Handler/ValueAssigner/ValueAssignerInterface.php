@@ -14,20 +14,20 @@ interface ValueAssignerInterface extends HandlerInterface
     /**
      * Determine if this value assigner is able to assign given value to given target
      *
-     * @param object $target
-     * @param \Reflector $reflection
+     * @param $object
+     * @param \ReflectionMethod|\ReflectionProperty $target
      * @param mixed $value
      * @return boolean
      */
-    public function canAssign($target, \Reflector $reflection, $value): bool;
+    public function canAssign($object, \Reflector $target, $value): bool;
 
     /**
      * Convert given value into given type
      *
-     * @param object $target
-     * @param \Reflector $reflection
+     * @param $object
+     * @param \ReflectionMethod|\ReflectionProperty $target
      * @param mixed $value
      * @return boolean
      */
-    public function assign($target, \Reflector $reflection, $value): bool;
+    public function assign($object, \Reflector $target, $value): bool;
 }
