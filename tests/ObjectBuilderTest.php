@@ -202,7 +202,8 @@ class ObjectBuilderTest extends TestCase
     public function testUseOfDataProcessor()
     {
         $registry = $this->getTestRegistry();
-        $registry->addHandlers(new class implements DataProcessorInterface {
+        $registry->addHandlers(new class implements DataProcessorInterface
+        {
             public function canProcess(\ReflectionClass $reflection, array $data): bool
             {
                 return true;
@@ -217,6 +218,41 @@ class ObjectBuilderTest extends TestCase
         $object = $builder->build(ScalarTypes::class);
         /** @noinspection NullPointerExceptionInspection */
         $this->assertEquals($object->getExpectedResult(), $object->getActualResult());
+    }
+
+    public function testAttemptToSetUnavailableKeyNormallyShouldBeSwallowed()
+    {
+        $builder = $this->getTestBuilder();
+        $object = $builder->build(\stdClass::class, ['unknown' => true]);
+        $reflection = new \ReflectionObject($object);
+        $this->assertFalse($reflection->hasProperty('unknown'));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testStrictModeShouldThrowExceptionOnInvalidData()
+    {
+        $builder = $this->getTestBuilder();
+        $builder->build(\stdClass::class, [
+            'unavailable-key' => true,
+        ], [
+            ObjectBuilderInterface::STRICT => true,
+        ]);
+    }
+
+    /**
+     * @expectedException \Flying\ObjectBuilder\DebugException
+     */
+    public function testDebugModeShouldConvertExceptionsInToDebugException()
+    {
+        $builder = $this->getTestBuilder();
+        $builder->build(\stdClass::class, [
+            'unavailable-key' => true,
+        ], [
+            ObjectBuilderInterface::STRICT => true,
+            ObjectBuilderInterface::DEBUG  => true,
+        ]);
     }
 
     /**
