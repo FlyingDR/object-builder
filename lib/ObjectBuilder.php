@@ -2,12 +2,12 @@
 
 namespace Flying\ObjectBuilder;
 
+use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
 use Flying\ObjectBuilder\ReflectionCache\ReflectionCache;
-use Flying\ObjectBuilder\Registry\HandlersList;
 use Flying\ObjectBuilder\Registry\HandlersRegistryInterface;
 
 class ObjectBuilder implements ObjectBuilderInterface
@@ -17,34 +17,16 @@ class ObjectBuilder implements ObjectBuilderInterface
      */
     private $targetsCache = [];
     /**
-     * @var TargetProviderInterface[]
+     * @var HandlersRegistryInterface
      */
-    private $providers;
-    /**
-     * @var TypeConverterInterface[]
-     */
-    private $converters;
-    /**
-     * @var ValueAssignerInterface[]
-     */
-    private $assigners;
+    private $handlers;
 
     /**
      * @param HandlersRegistryInterface $handlers
      */
     public function __construct(HandlersRegistryInterface $handlers)
     {
-        $init = function (HandlersList $handlers, &$target) {
-            foreach ($handlers as $handler) {
-                if ($handler instanceof ObjectBuilderAwareHandlerInterface) {
-                    $handler->setBuilder($this);
-                }
-            }
-            $target = $handlers->toArray();
-        };
-        $init($handlers->getHandlers(TargetProviderInterface::class), $this->providers);
-        $init($handlers->getHandlers(TypeConverterInterface::class), $this->converters);
-        $init($handlers->getHandlers(ValueAssignerInterface::class), $this->assigners);
+        $this->handlers = $handlers;
     }
 
     /**
@@ -61,7 +43,7 @@ class ObjectBuilder implements ObjectBuilderInterface
 
         // Prepare list target providers that can handle our class
         /** @var TargetProviderInterface[] $providers */
-        $providers = array_filter($this->providers, function (TargetProviderInterface $provider) use ($reflection) {
+        $providers = array_filter($this->getHandlers(TargetProviderInterface::class), function (TargetProviderInterface $provider) use ($reflection) {
             return $provider->canGetTarget($reflection);
         });
         $methods = ReflectionCache::getMethods($reflection);
@@ -76,9 +58,6 @@ class ObjectBuilder implements ObjectBuilderInterface
                 $target = null;
                 foreach ($providers as $provider) {
                     try {
-                        if (!$provider->canGetTarget($reflection)) {
-                            continue;
-                        }
                         $ct = $provider->getTarget($reflection, $key);
                     } catch (\Exception $e) {
                         continue;
@@ -115,7 +94,9 @@ class ObjectBuilder implements ObjectBuilderInterface
             }
 
             // Attempt to convert data value into type that is expected by object, being built
-            foreach ($this->converters as $converter) {
+            /** @var TypeConverterInterface[] $converters */
+            $converters = $this->getHandlers(TypeConverterInterface::class);
+            foreach ($converters as $converter) {
                 try {
                     if (!$converter->canConvert($target, $value)) {
                         continue;
@@ -132,7 +113,9 @@ class ObjectBuilder implements ObjectBuilderInterface
 
             // Attempt to assign object value to the object
             $assigned = false;
-            foreach ($this->assigners as $assigner) {
+            /** @var ValueAssignerInterface[] $assigners */
+            $assigners = $this->getHandlers(ValueAssignerInterface::class);
+            foreach ($assigners as $assigner) {
                 try {
                     if (!$assigner->canAssign($object, $target, $value)) {
                         continue;
@@ -151,5 +134,24 @@ class ObjectBuilder implements ObjectBuilderInterface
         }
 
         return $object;
+    }
+
+    /**
+     * Get handlers of given type
+     * Implemented as separate method to allow assigning instance of object builder
+     * to handlers that need it
+     *
+     * @param string $type
+     * @return HandlerInterface[]
+     */
+    protected function getHandlers(string $type): array
+    {
+        $handlers = $this->handlers->getHandlers($type)->toArray();
+        foreach ($handlers as $handler) {
+            if ($handler instanceof ObjectBuilderAwareHandlerInterface) {
+                $handler->setBuilder($this);
+            }
+        }
+        return $handlers;
     }
 }

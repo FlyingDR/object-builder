@@ -9,6 +9,7 @@ use Flying\ObjectBuilder\Handler\ValueAssigner\DefaultValueAssigner;
 use Flying\ObjectBuilder\ObjectBuilder;
 use Flying\ObjectBuilder\ObjectBuilderInterface;
 use Flying\ObjectBuilder\Registry\HandlersRegistry;
+use Flying\ObjectBuilder\Registry\HandlersRegistryInterface;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\BuilderAwareHandlerTypeProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\PrioritizedTypeProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ScalarTypes;
@@ -140,15 +141,53 @@ class ObjectBuilderTest extends TestCase
         $this->assertSame($builder, $call->getArguments()[0]);
     }
 
+
+    public function testObjectHandlerCanBeSharedAmongDifferentObjectBuilders()
+    {
+        $calls = [];
+        $handler = $this->prophesize(BuilderAwareHandlerTypeProvider::class);
+        /** @noinspection PhpParamsInspection, NullPointerExceptionInspection */
+        $handler
+            ->setBuilder(Argument::type(ObjectBuilder::class))
+            ->shouldBeCalled()
+            ->will(function ($args) use (&$calls) {
+                $calls[] = $args[0];
+            });
+        /** @noinspection PhpParamsInspection */
+        $handler
+            ->canGetTarget(Argument::type(\ReflectionClass::class))
+            ->shouldBeCalled()
+            ->willReturn(false);
+        $handlers = new HandlersRegistry([
+            $handler->reveal(),
+        ]);
+        $b1 = new ObjectBuilder($handlers);
+        $b2 = new ObjectBuilder($handlers);
+
+        $b1->build(\stdClass::class);
+        $b2->build(\stdClass::class);
+
+        $this->assertSame($b1, $calls[0]);
+        $this->assertSame($b2, $calls[1]);
+    }
+
     /**
      * @return ObjectBuilderInterface
      */
-    public function getTestBuilder(): ObjectBuilderInterface
+    protected function getTestBuilder(): ObjectBuilderInterface
     {
-        return new ObjectBuilder(new HandlersRegistry([
+        return new ObjectBuilder($this->getTestRegistry());
+    }
+
+    /**
+     * @return HandlersRegistryInterface
+     */
+    protected function getTestRegistry(): HandlersRegistryInterface
+    {
+        return new HandlersRegistry([
             new DefaultTargetProvider(),
             new DefaultTypeConverter(),
             new DefaultValueAssigner(),
-        ]));
+        ]);
     }
 }
