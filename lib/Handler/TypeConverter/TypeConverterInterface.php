@@ -13,17 +13,20 @@ interface TypeConverterInterface extends HandlerInterface
      * Determine if this converter is able to convert given value into given type
      *
      * @param \ReflectionMethod|\ReflectionProperty $reflection
-     * @param mixed $value
+     * @param array $data
+     * @param string $key
      * @return boolean
      */
-    public function canConvert(\Reflector $reflection, $value): bool;
+    public function canConvert(\Reflector $reflection, array $data, string $key): bool;
 
     /**
      * Convert given value into given type
      *
      * @param \ReflectionMethod|\ReflectionProperty $reflection
-     * @param mixed $value Value to convert, passed by reference
-     * @return boolean  true if value was converted, false if not
+     * @param array $data
+     * @param string $key
+     * @return mixed
+     * @throws NotConvertedException
      */
-    public function convert(\Reflector $reflection, &$value): bool;
+    public function convert(\Reflector $reflection, array $data, string $key);
 }

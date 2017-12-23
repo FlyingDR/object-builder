@@ -61,7 +61,7 @@ class UniversalHandler implements DataProcessorInterface, ObjectConstructorInter
     /**
      * {@inheritdoc}
      */
-    public function canConvert(\Reflector $reflection, $value): bool
+    public function canConvert(\Reflector $reflection, array $data, string $key): bool
     {
         return false;
     }
@@ -69,7 +69,7 @@ class UniversalHandler implements DataProcessorInterface, ObjectConstructorInter
     /**
      * {@inheritdoc}
      */
-    public function convert(\Reflector $reflection, &$value): bool
+    public function convert(\Reflector $reflection, array $data, string $key)
     {
         return false;
     }

@@ -12,47 +12,44 @@ class DefaultTypeConverter implements TypeConverterInterface, PrioritizedHandler
     /**
      * {@inheritdoc}
      */
-    public function canConvert(\Reflector $reflection, $value): bool
+    public function canConvert(\Reflector $reflection, array $data, string $key): bool
     {
         if (!($reflection instanceof \ReflectionMethod) || $reflection->getNumberOfParameters() !== 1) {
             return false;
         }
 
-        return \in_array((string)$reflection->getParameters()[0]->getType(), ['bool', 'boolean', 'int', 'integer', 'float', 'double', 'string'], true);
+        return \in_array((string)$reflection->getParameters()[0]->getType(), [null, 'bool', 'boolean', 'int', 'integer', 'float', 'double', 'string'], true);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function convert(\Reflector $reflection, &$value): bool
+    public function convert(\Reflector $reflection, array $data, string $key)
     {
         /** @var \ReflectionMethod $reflection */
         $type = $reflection->getParameters()[0]->getType();
+        $value = $data[$key];
         if ($type === null) {
             // No explicit type is assigned to argument at given method
-            return true;
+            return $value;
         }
         if ($value === null && $type->allowsNull()) {
-            return true;
+            return $value;
         }
         switch ((string)$type) {
             case 'bool':
             case 'boolean':
-                $value = (boolean)$value;
-                return true;
+                return (boolean)$value;
             case 'int':
             case 'integer':
-                $value = (int)$value;
-                return true;
+                return (int)$value;
             case 'float':
             case 'double':
-                $value = (float)$value;
-                return true;
+                return (float)$value;
             case 'string':
-                $value = (string)$value;
-                return true;
+                return (string)$value;
         }
-        return false;
+        throw new NotConvertedException(sprintf('Unsupported data type "%s"', \gettype($value)));
     }
 
     /**

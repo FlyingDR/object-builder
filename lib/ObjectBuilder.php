@@ -7,6 +7,7 @@ use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectConstructor\ObjectConstructorInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
+use Flying\ObjectBuilder\Handler\TypeConverter\NotConvertedException;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
 use Flying\ObjectBuilder\ReflectionCache\ReflectionCache;
@@ -117,13 +118,14 @@ class ObjectBuilder implements ObjectBuilderInterface
             $converters = $this->getHandlers(TypeConverterInterface::class);
             foreach ($converters as $converter) {
                 try {
-                    if (!$converter->canConvert($target, $value)) {
+                    if (!$converter->canConvert($target, $data, $key)) {
                         continue;
                     }
-                    $v = $value;
-                    if ($converter->convert($target, $v)) {
-                        $value = $v;
+                    try {
+                        $value = $converter->convert($target, $data, $key);
                         break;
+                    } catch (NotConvertedException $e) {
+                        continue;
                     }
                 } catch (\Exception $e) {
                     continue;
