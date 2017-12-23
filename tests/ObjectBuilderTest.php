@@ -3,6 +3,7 @@
 namespace Flying\ObjectBuilder\Tests;
 
 use Flying\ObjectBuilder\Handler\DataProcessor\DataProcessorInterface;
+use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectConstructor\DefaultObjectConstructor;
 use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
@@ -97,20 +98,20 @@ class ObjectBuilderTest extends TestCase
             });
 
         $calls = [];
-        $builder = new ObjectBuilder(new HandlersRegistry([
+        $builder = $this->getTestBuilder([
             new DefaultObjectConstructor(),
             $h1->reveal(),
             $h2->reveal(),
-        ]));
+        ], false);
         $builder->build(\stdClass::class, ['a' => true]);
         $this->assertEquals([2, 1], $calls);
 
         $calls = [];
-        $builder = new ObjectBuilder(new HandlersRegistry([
+        $builder = $this->getTestBuilder([
             new DefaultObjectConstructor(),
             $h2->reveal(),
             $h1->reveal(),
-        ]));
+        ], false);
         $builder->build(\stdClass::class, ['a' => true]);
         $this->assertEquals([2, 1], $calls);
     }
@@ -138,11 +139,11 @@ class ObjectBuilderTest extends TestCase
                 return false;
             });
 
-        $builder = new ObjectBuilder(new HandlersRegistry([
+        $builder = $this->getTestBuilder([
             new DefaultObjectConstructor(),
             $h1->reveal(),
             $h2->reveal(),
-        ]));
+        ], false);
         $builder->build(\stdClass::class, ['a' => true]);
         $this->assertEquals([1, 2], $calls);
     }
@@ -159,10 +160,10 @@ class ObjectBuilderTest extends TestCase
             ->canGetTarget(Argument::type(\ReflectionClass::class))
             ->shouldBeCalled()
             ->willReturn(false);
-        $builder = new ObjectBuilder(new HandlersRegistry([
+        $builder = $this->getTestBuilder([
             new DefaultObjectConstructor(),
             $handler->reveal(),
-        ]));
+        ], false);
         $builder->build(\stdClass::class, ['a' => true]);
         $calls = $handler->findProphecyMethodCalls('setBuilder', new Argument\ArgumentsWildcard([Argument::type(ObjectBuilder::class)]));
         $this->assertCount(1, $calls);
@@ -187,12 +188,12 @@ class ObjectBuilderTest extends TestCase
             ->canGetTarget(Argument::type(\ReflectionClass::class))
             ->shouldBeCalled()
             ->willReturn(false);
-        $handlers = new HandlersRegistry([
+        $handlers = [
             new DefaultObjectConstructor(),
             $handler->reveal(),
-        ]);
-        $b1 = new ObjectBuilder($handlers);
-        $b2 = new ObjectBuilder($handlers);
+        ];
+        $b1 = $this->getTestBuilder($handlers, false);
+        $b2 = $this->getTestBuilder($handlers, false);
 
         $b1->build(\stdClass::class);
         $b2->build(\stdClass::class);
@@ -203,8 +204,7 @@ class ObjectBuilderTest extends TestCase
 
     public function testBuildingMultiLevelObjects()
     {
-        $registry = $this->getTestRegistry();
-        $registry->addHandlers(new ChildObjectConverter());
+        $registry = $this->getTestRegistry([new ChildObjectConverter()]);
         $builder = new ObjectBuilder($registry);
 
         /** @var MultiLevelObject $object */
@@ -227,19 +227,20 @@ class ObjectBuilderTest extends TestCase
 
     public function testUseOfDataProcessor()
     {
-        $registry = $this->getTestRegistry();
-        $registry->addHandlers(new class implements DataProcessorInterface
-        {
-            public function canProcess(\ReflectionClass $reflection, array $data): bool
+        $registry = $this->getTestRegistry([
+            new class implements DataProcessorInterface
             {
-                return true;
-            }
+                public function canProcess(\ReflectionClass $reflection, array $data): bool
+                {
+                    return true;
+                }
 
-            public function process(\ReflectionClass $reflection, array $data): array
-            {
-                return (new ScalarTypes())->getBuildData();
+                public function process(\ReflectionClass $reflection, array $data): array
+                {
+                    return (new ScalarTypes())->getBuildData();
+                }
             }
-        });
+        ]);
         $builder = new ObjectBuilder($registry);
         $object = $builder->build(ScalarTypes::class);
         /** @noinspection NullPointerExceptionInspection */
@@ -282,23 +283,26 @@ class ObjectBuilderTest extends TestCase
     }
 
     /**
+     * @param HandlerInterface[] $handlers
+     * @param bool $merge
      * @return ObjectBuilderInterface
      */
-    protected function getTestBuilder(): ObjectBuilderInterface
+    protected function getTestBuilder(array $handlers = [], bool $merge = true): ObjectBuilderInterface
     {
-        return new ObjectBuilder($this->getTestRegistry());
+        return new ObjectBuilder($merge ? $this->getTestRegistry($handlers) : new HandlersRegistry($handlers));
     }
 
     /**
+     * @param array $handlers
      * @return HandlersRegistryInterface
      */
-    protected function getTestRegistry(): HandlersRegistryInterface
+    protected function getTestRegistry(array $handlers = []): HandlersRegistryInterface
     {
-        return new HandlersRegistry([
+        return new HandlersRegistry(array_merge([
             new DefaultObjectConstructor(),
             new DefaultTargetProvider(),
             new DefaultTypeConverter(),
             new DefaultValueAssigner(),
-        ]);
+        ], $handlers));
     }
 }
