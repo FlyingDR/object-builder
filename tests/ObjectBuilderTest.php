@@ -15,6 +15,7 @@ use Flying\ObjectBuilder\Registry\HandlersRegistry;
 use Flying\ObjectBuilder\Registry\HandlersRegistryInterface;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\BuilderAwareHandlerTypeProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\PrioritizedTypeProvider;
+use Flying\ObjectBuilder\Tests\Fixtures\TestObject\AbstractTestObject;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ChildObject;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\MultiLevelObject;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ScalarTypes;
@@ -43,6 +44,26 @@ class ObjectBuilderTest extends TestCase
     {
         return [
             [new ScalarTypes()],
+        ];
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @dataProvider dpNonInstantiableObjects
+     * @param string $class
+     */
+    public function testAttemptToBuildNonInstantiableObjectShouldFail(string $class)
+    {
+        $builder = $this->getTestBuilder();
+        $builder->build($class);
+    }
+
+    public function dpNonInstantiableObjects()
+    {
+        return [
+            ['some unavailable class'],
+            [TestObjectInterface::class],
+            [AbstractTestObject::class],
         ];
     }
 
@@ -77,6 +98,7 @@ class ObjectBuilderTest extends TestCase
 
         $calls = [];
         $builder = new ObjectBuilder(new HandlersRegistry([
+            new DefaultObjectConstructor(),
             $h1->reveal(),
             $h2->reveal(),
         ]));
@@ -85,6 +107,7 @@ class ObjectBuilderTest extends TestCase
 
         $calls = [];
         $builder = new ObjectBuilder(new HandlersRegistry([
+            new DefaultObjectConstructor(),
             $h2->reveal(),
             $h1->reveal(),
         ]));
@@ -116,6 +139,7 @@ class ObjectBuilderTest extends TestCase
             });
 
         $builder = new ObjectBuilder(new HandlersRegistry([
+            new DefaultObjectConstructor(),
             $h1->reveal(),
             $h2->reveal(),
         ]));
@@ -136,6 +160,7 @@ class ObjectBuilderTest extends TestCase
             ->shouldBeCalled()
             ->willReturn(false);
         $builder = new ObjectBuilder(new HandlersRegistry([
+            new DefaultObjectConstructor(),
             $handler->reveal(),
         ]));
         $builder->build(\stdClass::class, ['a' => true]);
@@ -163,6 +188,7 @@ class ObjectBuilderTest extends TestCase
             ->shouldBeCalled()
             ->willReturn(false);
         $handlers = new HandlersRegistry([
+            new DefaultObjectConstructor(),
             $handler->reveal(),
         ]);
         $b1 = new ObjectBuilder($handlers);

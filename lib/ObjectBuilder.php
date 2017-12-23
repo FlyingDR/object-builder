@@ -83,6 +83,9 @@ class ObjectBuilder implements ObjectBuilderInterface
                     continue;
                 }
             }
+            if (!\is_object($object)) {
+                throw new \InvalidArgumentException(sprintf('Failed to create instance of "%s" object', $class));
+            }
 
             // Prepare list target providers that can handle our class
             /** @var TargetProviderInterface[] $providers */
