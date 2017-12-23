@@ -2,12 +2,15 @@
 
 namespace Flying\ObjectBuilder;
 
+use Flying\ObjectBuilder\Exception\BuildFailedException;
+use Flying\ObjectBuilder\Exception\DebugException;
+use Flying\ObjectBuilder\Exception\NotConvertedException;
+use Flying\ObjectBuilder\Exception\ReflectionException;
 use Flying\ObjectBuilder\Handler\DataProcessor\DataProcessorInterface;
 use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectConstructor\ObjectConstructorInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
-use Flying\ObjectBuilder\Handler\TypeConverter\NotConvertedException;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
 use Flying\ObjectBuilder\ReflectionCache\ReflectionCache;
@@ -34,8 +37,6 @@ class ObjectBuilder implements ObjectBuilderInterface
 
     /**
      * {@inheritdoc}
-     * @throws DebugException
-     * @throws \InvalidArgumentException
      */
     public function build(string $class, array $data = [], array $options = [])
     {
@@ -53,7 +54,12 @@ class ObjectBuilder implements ObjectBuilderInterface
                         continue;
                     }
                     $data = $processor->process($reflection, $data);
+                } catch (BuildFailedException $e) {
+                    throw $e;
                 } catch (\Exception $e) {
+                    if ($options[self::DEBUG]) {
+                        throw new DebugException($e);
+                    }
                     continue;
                 }
             }
@@ -72,6 +78,8 @@ class ObjectBuilder implements ObjectBuilderInterface
                         $object = $instance;
                         break;
                     }
+                } catch (BuildFailedException $e) {
+                    throw $e;
                 } catch (\Exception $e) {
                     if ($options[self::DEBUG]) {
                         throw new DebugException($e);
@@ -80,7 +88,7 @@ class ObjectBuilder implements ObjectBuilderInterface
                 }
             }
             if (!\is_object($object)) {
-                throw new \InvalidArgumentException(sprintf('Failed to create instance of "%s" object', $class));
+                throw new BuildFailedException(sprintf('Failed to create instance of "%s" object', $class));
             }
             // It is possible that actual object instance is not the same as class name, initially passed to object builder
             // for example in a case if object builder receives name of interface and custom object constructor creates
@@ -117,6 +125,8 @@ class ObjectBuilder implements ObjectBuilderInterface
                                 $target = $ct;
                                 break;
                             }
+                        } catch (BuildFailedException $e) {
+                            throw $e;
                         } catch (\Exception $e) {
                             if ($options[self::DEBUG]) {
                                 throw new DebugException($e);
@@ -136,7 +146,7 @@ class ObjectBuilder implements ObjectBuilderInterface
 
                 if ($target === false) {
                     if ($options[self::STRICT]) {
-                        throw new \InvalidArgumentException(sprintf('Data item "%s" can\'t be assigned to class "%s"', $key, $class));
+                        throw new BuildFailedException(sprintf('Data item "%s" can\'t be assigned to class "%s"', $key, $class));
                     }
                     continue;
                 }
@@ -150,9 +160,13 @@ class ObjectBuilder implements ObjectBuilderInterface
                         try {
                             $value = $converter->convert($target, $data, $key);
                             break;
+                        } catch (BuildFailedException $e) {
+                            throw $e;
                         } catch (NotConvertedException $e) {
                             continue;
                         }
+                    } catch (BuildFailedException $e) {
+                        throw $e;
                     } catch (\Exception $e) {
                         if ($options[self::DEBUG]) {
                             throw new DebugException($e);
@@ -172,6 +186,8 @@ class ObjectBuilder implements ObjectBuilderInterface
                             $assigned = true;
                             break;
                         }
+                    } catch (BuildFailedException $e) {
+                        throw $e;
                     } catch (\Throwable $e) {
                         if ($options[self::DEBUG]) {
                             throw new DebugException($e);
@@ -180,17 +196,28 @@ class ObjectBuilder implements ObjectBuilderInterface
                     }
                 }
                 if (!$assigned && $options[self::STRICT]) {
-                    throw new \InvalidArgumentException(sprintf('Failed to assign object data item "%s" to object "%s"', $key, $class));
+                    throw new BuildFailedException(sprintf('Failed to assign object data item "%s" to object "%s"', $key, $class));
                 }
             }
 
             return $object;
-        } catch (\Throwable $e) {
+        } catch (ReflectionException $e) {
+            if ($options[self::DEBUG]) {
+                throw new DebugException($e);
+            }
+            BuildFailedException::throw($e);
+        } catch (BuildFailedException $e) {
             if ($options[self::DEBUG]) {
                 throw new DebugException($e);
             }
             throw $e;
+        } catch (\Throwable $e) {
+            if ($options[self::DEBUG]) {
+                throw new DebugException($e);
+            }
+            BuildFailedException::throw($e);
         }
+        return null;
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Flying\ObjectBuilder\Registry;
 
+use Flying\ObjectBuilder\Exception\HandlerFailureException;
 use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
 
@@ -27,7 +28,7 @@ class HandlersList implements HandlersListInterface
     /**
      * @param string $interface
      * @param HandlerInterface[] $handlers
-     * @throws \InvalidArgumentException
+     * @throws HandlerFailureException
      */
     public function __construct(string $interface, array $handlers = [])
     {
@@ -67,7 +68,7 @@ class HandlersList implements HandlersListInterface
     /**
      * @param HandlerInterface[] $handlers
      * @return HandlersList
-     * @throws \InvalidArgumentException
+     * @throws HandlerFailureException
      */
     public function set(array $handlers): HandlersList
     {
@@ -83,7 +84,7 @@ class HandlersList implements HandlersListInterface
      *
      * @param HandlerInterface $handler
      * @return HandlersList
-     * @throws \InvalidArgumentException
+     * @throws HandlerFailureException
      */
     public function add(HandlerInterface $handler): HandlersList
     {
@@ -176,13 +177,13 @@ class HandlersList implements HandlersListInterface
     /**
      * @param mixed $handler
      * @return HandlerInterface
-     * @throws \InvalidArgumentException
+     * @throws HandlerFailureException
      */
     protected function validate($handler): HandlerInterface
     {
         if (!\is_object($handler) || !is_subclass_of($handler, $this->interface)) {
             /** @noinspection ExceptionsAnnotatingAndHandlingInspection */
-            throw new \InvalidArgumentException(sprintf('Object builder handler should implement "%s" interface', (new \ReflectionClass($this->interface))->getShortName()));
+            throw new HandlerFailureException(sprintf('Object builder handler should implement "%s" interface', (new \ReflectionClass($this->interface))->getShortName()));
         }
         return $handler;
     }

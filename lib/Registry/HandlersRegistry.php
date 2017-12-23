@@ -2,6 +2,7 @@
 
 namespace Flying\ObjectBuilder\Registry;
 
+use Flying\ObjectBuilder\Exception\HandlerFailureException;
 use Flying\ObjectBuilder\Handler\DataProcessor\DataProcessorInterface;
 use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectConstructor\ObjectConstructorInterface;
@@ -25,7 +26,7 @@ class HandlersRegistry implements HandlersRegistryInterface
 
     /**
      * {@inheritdoc}
-     * @throws \InvalidArgumentException
+     * @throws HandlerFailureException
      */
     public function __construct($handlers = null)
     {
@@ -37,7 +38,7 @@ class HandlersRegistry implements HandlersRegistryInterface
 
     /**
      * {@inheritdoc}
-     * @throws \InvalidArgumentException
+     * @throws HandlerFailureException
      */
     public function addHandlers($handlers): void
     {
@@ -46,7 +47,7 @@ class HandlersRegistry implements HandlersRegistryInterface
         }
         foreach ((array)$handlers as $handler) {
             if (!\is_object($handler)) {
-                throw new \InvalidArgumentException(sprintf('Only objects are accepted as handlers, "%s" given', \gettype($handler)));
+                throw new HandlerFailureException(sprintf('Only objects are accepted as handlers, "%s" given', \gettype($handler)));
             }
             if ($handler instanceof HandlersRegistryInterface) {
                 foreach ($handler->getHandlers() as $list) {
@@ -60,7 +61,7 @@ class HandlersRegistry implements HandlersRegistryInterface
             }
 
             if (!$handler instanceof HandlerInterface) {
-                throw new \InvalidArgumentException(sprintf('Object builder handler "%s" should implement HandlerInterface', \get_class($handler)));
+                throw new HandlerFailureException(sprintf('Object builder handler "%s" should implement HandlerInterface', \get_class($handler)));
             }
             $assigned = false;
             foreach (self::$handlerTypes as $type) {
@@ -74,14 +75,14 @@ class HandlersRegistry implements HandlersRegistryInterface
                 $assigned = true;
             }
             if (!$assigned) {
-                throw new \InvalidArgumentException(sprintf('Unknown object builder handler type "%s"', \get_class($handler)));
+                throw new HandlerFailureException(sprintf('Unknown object builder handler type "%s"', \get_class($handler)));
             }
         }
     }
 
     /**
      * {@inheritdoc}
-     * @throws \InvalidArgumentException
+     * @throws HandlerFailureException
      */
     public function getHandlers(?string $type = null)
     {
@@ -89,7 +90,7 @@ class HandlersRegistry implements HandlersRegistryInterface
             return $this->handlers;
         }
         if (!\in_array($type, self::$handlerTypes, true)) {
-            throw new \InvalidArgumentException(sprintf('Unknown object builder handlers type "%s"', $type));
+            throw new HandlerFailureException(sprintf('Unknown object builder handlers type "%s"', $type));
         }
         if (!array_key_exists($type, $this->handlers)) {
             $this->handlers[$type] = new HandlersList($type);

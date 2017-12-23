@@ -48,7 +48,7 @@ class ObjectBuilderTest extends TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Flying\ObjectBuilder\Exception\BuildFailedException
      * @dataProvider dpNonInstantiableObjects
      * @param string $class
      */
@@ -255,7 +255,7 @@ class ObjectBuilderTest extends TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Flying\ObjectBuilder\Exception\BuildFailedException
      */
     public function testStrictModeShouldThrowExceptionOnInvalidData()
     {
@@ -268,7 +268,7 @@ class ObjectBuilderTest extends TestCase
     }
 
     /**
-     * @expectedException \Flying\ObjectBuilder\DebugException
+     * @expectedException \Flying\ObjectBuilder\Exception\DebugException
      */
     public function testDebugModeShouldConvertExceptionsInToDebugException()
     {

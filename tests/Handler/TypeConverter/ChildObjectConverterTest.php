@@ -185,7 +185,7 @@ class ChildObjectConverterTest extends TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Flying\ObjectBuilder\Exception\BuildFailedException
      */
     public function testFailedBuildOfChildObjectShouldBreakMainObjectBuildInStrictMode()
     {

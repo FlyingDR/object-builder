@@ -2,6 +2,8 @@
 
 namespace Flying\ObjectBuilder\Handler\TypeConverter;
 
+use Flying\ObjectBuilder\Exception\NotConvertedException;
+use Flying\ObjectBuilder\Exception\ReflectionException;
 use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
 use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
 use Flying\ObjectBuilder\ObjectBuilderInterface;
@@ -43,7 +45,7 @@ class ChildObjectConverter implements TypeConverterInterface, ObjectBuilderAware
             // so we need to check ability to create reflection for the class
             ReflectionCache::getReflection($class);
             return true;
-        } catch (\InvalidArgumentException $e) {
+        } catch (ReflectionException $e) {
             return false;
         }
     }
@@ -59,8 +61,9 @@ class ChildObjectConverter implements TypeConverterInterface, ObjectBuilderAware
         try {
             return $this->builder->build($class, $data[$key]);
         } catch (\Exception $e) {
-            throw NotConvertedException::exceptionOccurs($e);
+            NotConvertedException::throw($e);
         }
+        return null;
     }
 
     /**

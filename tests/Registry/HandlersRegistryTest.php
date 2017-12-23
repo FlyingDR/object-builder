@@ -186,7 +186,7 @@ class HandlersRegistryTest extends TestCase
 
     /**
      * @param mixed $handlers
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Flying\ObjectBuilder\Exception\HandlerFailureException
      * @dataProvider dpInvalidData
      */
     public function testPassingInvalidDataShouldFail($handlers)
@@ -206,7 +206,7 @@ class HandlersRegistryTest extends TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @expectedException \Flying\ObjectBuilder\Exception\HandlerFailureException
      */
     public function testRetrievingInvalidHandlerTypeShouldFail()
     {

@@ -2,6 +2,7 @@
 
 namespace Flying\ObjectBuilder\Handler\TypeConverter;
 
+use Flying\ObjectBuilder\Exception\NotConvertedException;
 use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
 
 /**

@@ -2,6 +2,7 @@
 
 namespace Flying\ObjectBuilder\Tests\Registry;
 
+use Flying\ObjectBuilder\Exception\HandlerFailureException;
 use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\DefaultTypeConverter;
@@ -20,7 +21,7 @@ class HandlersListTest extends TestCase
     public function testItemsPassedInConstructorShouldBeValidatedAgainstInterface($interface, $items, $shouldFail)
     {
         if ($shouldFail) {
-            $this->expectException(\InvalidArgumentException::class);
+            $this->expectException(HandlerFailureException::class);
         }
         $list = new HandlersList($interface, $items);
         $this->assertSame($items, $list->toArray());

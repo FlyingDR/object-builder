@@ -2,6 +2,8 @@
 
 namespace Flying\ObjectBuilder\ReflectionCache;
 
+use Flying\ObjectBuilder\Exception\ReflectionException;
+
 class ReflectionCache implements ReflectionCacheInterface
 {
     /**
@@ -19,17 +21,16 @@ class ReflectionCache implements ReflectionCacheInterface
 
     /**
      * {@inheritdoc}
-     * @throws \InvalidArgumentException
+     * @throws ReflectionException
      */
     public static function getReflection(string $class): \ReflectionClass
     {
         if (!array_key_exists($class, self::$reflections)) {
             try {
-                $reflection = new \ReflectionClass($class);
+                self::$reflections[$class] = new \ReflectionClass($class);
             } /** @noinspection PhpRedundantCatchClauseInspection */ catch (\ReflectionException $e) {
-                throw new \InvalidArgumentException(sprintf('Failed to create reflection for class "%s", it probably doesn\'t exists', $class));
+                ReflectionException::throw($e, sprintf('Failed to create reflection for class "%s", it probably doesn\'t exists', $class));
             }
-            self::$reflections[$class] = $reflection;
         }
         return self::$reflections[$class];
     }

@@ -2,6 +2,8 @@
 
 namespace Flying\ObjectBuilder;
 
+use Flying\ObjectBuilder\Exception\ObjectBuilderException;
+
 /**
  * Interface for object builders
  */
@@ -29,6 +31,7 @@ interface ObjectBuilderInterface
      * @param array $data
      * @param array $options
      * @return object
+     * @throws ObjectBuilderException
      */
     public function build(string $class, array $data = [], array $options = []);
 }
