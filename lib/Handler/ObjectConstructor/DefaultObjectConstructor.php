@@ -9,7 +9,7 @@ class DefaultObjectConstructor implements ObjectConstructorInterface
      */
     public function canConstruct(\ReflectionClass $reflection, array $data): bool
     {
-        return true;
+        return $reflection->isInstantiable();
     }
 
     /**
