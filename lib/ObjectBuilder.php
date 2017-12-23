@@ -6,6 +6,7 @@ use Flying\ObjectBuilder\Exception\BuildFailedException;
 use Flying\ObjectBuilder\Exception\DebugException;
 use Flying\ObjectBuilder\Exception\NotConvertedException;
 use Flying\ObjectBuilder\Exception\ReflectionException;
+use Flying\ObjectBuilder\Exception\SkipDataException;
 use Flying\ObjectBuilder\Handler\DataProcessor\DataProcessorInterface;
 use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
@@ -125,6 +126,9 @@ class ObjectBuilder implements ObjectBuilderInterface
                                 $target = $ct;
                                 break;
                             }
+                        } catch (SkipDataException $e) {
+                            // Target provider tells us that this piece of data should be skipped - do it
+                            continue 2;
                         } catch (BuildFailedException $e) {
                             throw $e;
                         } catch (\Exception $e) {

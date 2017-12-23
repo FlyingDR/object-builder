@@ -16,10 +16,12 @@ use Flying\ObjectBuilder\Registry\HandlersRegistry;
 use Flying\ObjectBuilder\Registry\HandlersRegistryInterface;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\BuilderAwareHandlerTypeProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\PrioritizedTypeProvider;
+use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\SkipDataProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\AbstractTestObject;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ChildObject;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\MultiLevelObject;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ScalarTypes;
+use Flying\ObjectBuilder\Tests\Fixtures\TestObject\SkipDataObject;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\TestObjectInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
@@ -280,6 +282,19 @@ class ObjectBuilderTest extends TestCase
             ObjectBuilderInterface::STRICT => true,
             ObjectBuilderInterface::DEBUG  => true,
         ]);
+    }
+
+    public function testSkippingObjectData()
+    {
+        $builder = $this->getTestBuilder([new SkipDataProvider()]);
+        $object = $builder->build(SkipDataObject::class, [
+            'value'   => 'success',
+            'skipped' => 'no',
+        ]);
+        /** @var SkipDataObject $object */
+        $this->assertInstanceOf(SkipDataObject::class, $object);
+        $this->assertEquals('success', $object->getValue());
+        $this->assertNull($object->getSkipped());
     }
 
     /**
