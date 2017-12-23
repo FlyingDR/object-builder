@@ -28,7 +28,13 @@ class DefaultValueAssigner implements ValueAssignerInterface, PrioritizedHandler
         }
 
         if ($target instanceof \ReflectionProperty) {
+            if (!$target->isPublic()) {
+                $target->setAccessible(true);
+            }
             $target->setValue($object, $value);
+            if (!$target->isPublic()) {
+                $target->setAccessible(false);
+            }
             return true;
         }
 
