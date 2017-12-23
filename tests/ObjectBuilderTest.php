@@ -4,6 +4,7 @@ namespace Flying\ObjectBuilder\Tests;
 
 use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
+use Flying\ObjectBuilder\Handler\TypeConverter\ChildObjectConverter;
 use Flying\ObjectBuilder\Handler\TypeConverter\DefaultTypeConverter;
 use Flying\ObjectBuilder\Handler\ValueAssigner\DefaultValueAssigner;
 use Flying\ObjectBuilder\ObjectBuilder;
@@ -12,6 +13,8 @@ use Flying\ObjectBuilder\Registry\HandlersRegistry;
 use Flying\ObjectBuilder\Registry\HandlersRegistryInterface;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\BuilderAwareHandlerTypeProvider;
 use Flying\ObjectBuilder\Tests\Fixtures\Handler\TargetProvider\PrioritizedTypeProvider;
+use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ChildObject;
+use Flying\ObjectBuilder\Tests\Fixtures\TestObject\MultiLevelObject;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\ScalarTypes;
 use Flying\ObjectBuilder\Tests\Fixtures\TestObject\TestObjectInterface;
 use PHPUnit\Framework\TestCase;
@@ -141,7 +144,6 @@ class ObjectBuilderTest extends TestCase
         $this->assertSame($builder, $call->getArguments()[0]);
     }
 
-
     public function testObjectHandlerCanBeSharedAmongDifferentObjectBuilders()
     {
         $calls = [];
@@ -169,6 +171,30 @@ class ObjectBuilderTest extends TestCase
 
         $this->assertSame($b1, $calls[0]);
         $this->assertSame($b2, $calls[1]);
+    }
+
+    public function testBuildingMultiLevelObjects()
+    {
+        $registry = $this->getTestRegistry();
+        $registry->addHandlers(new ChildObjectConverter());
+        $builder = new ObjectBuilder($registry);
+
+        /** @var MultiLevelObject $object */
+        $object = $builder->build(MultiLevelObject::class, ['child' => []]);
+        $this->assertInstanceOf(ChildObject::class, $object->getChild());
+        /** @var MultiLevelObject $object */
+        $object = $builder->build(MultiLevelObject::class, [
+            'child' => [
+                'value' => 'abc',
+                'child' => [
+                    'value' => 'xyz',
+                ]
+            ]
+        ]);
+        $this->assertInstanceOf(ChildObject::class, $object->getChild());
+        $this->assertEquals('abc', $object->getChild()->getValue());
+        $this->assertInstanceOf(ChildObject::class, $object->getChild()->getChild());
+        $this->assertEquals('xyz', $object->getChild()->getChild()->getValue());
     }
 
     /**
