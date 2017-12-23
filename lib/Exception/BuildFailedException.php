@@ -11,7 +11,7 @@ class BuildFailedException extends ObjectBuilderException
      * {@inheritdoc}
      * @throws BuildFailedException
      */
-    public static function throw(\Throwable $exception, ?string $message = null): void
+    public static function throw(?\Throwable $exception = null, ?string $message = null): void
     {
         throw new self($message ?? 'Object build is failed', 0, $exception);
     }

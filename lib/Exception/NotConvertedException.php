@@ -11,7 +11,7 @@ class NotConvertedException extends ObjectBuilderException
      * {@inheritdoc}
      * @throws NotConvertedException
      */
-    public static function throw(\Throwable $exception, ?string $message = null): void
+    public static function throw(?\Throwable $exception = null, ?string $message = null): void
     {
         throw new self($message ?? 'Failed to convert type due to exception', 0, $exception);
     }

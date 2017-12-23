@@ -8,8 +8,8 @@ namespace Flying\ObjectBuilder\Exception;
 interface ObjectBuilderExceptionInterface
 {
     /**
-     * @param \Throwable $exception
+     * @param \Throwable|null $exception
      * @param string|null $message
      */
-    public static function throw(\Throwable $exception, ?string $message = null): void;
+    public static function throw(?\Throwable $exception = null, ?string $message = null): void;
 }

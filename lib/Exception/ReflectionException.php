@@ -11,7 +11,7 @@ class ReflectionException extends ObjectBuilderException
      * {@inheritdoc}
      * @throws ReflectionException
      */
-    public static function throw(\Throwable $exception, ?string $message = null): void
+    public static function throw(?\Throwable $exception = null, ?string $message = null): void
     {
         throw new self($message ?? 'Reflection failure', 0, $exception);
     }

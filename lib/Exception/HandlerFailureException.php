@@ -11,7 +11,7 @@ class HandlerFailureException extends ObjectBuilderException
      * {@inheritdoc}
      * @throws HandlerFailureException
      */
-    public static function throw(\Throwable $exception, ?string $message = null): void
+    public static function throw(?\Throwable $exception = null, ?string $message = null): void
     {
         throw new self($message ?? 'Object builder handler problem', 0, $exception);
     }
