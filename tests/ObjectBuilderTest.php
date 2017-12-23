@@ -2,6 +2,7 @@
 
 namespace Flying\ObjectBuilder\Tests;
 
+use Flying\ObjectBuilder\Handler\DataProcessor\DataProcessorInterface;
 use Flying\ObjectBuilder\Handler\ObjectConstructor\DefaultObjectConstructor;
 use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
@@ -196,6 +197,26 @@ class ObjectBuilderTest extends TestCase
         $this->assertEquals('abc', $object->getChild()->getValue());
         $this->assertInstanceOf(ChildObject::class, $object->getChild()->getChild());
         $this->assertEquals('xyz', $object->getChild()->getChild()->getValue());
+    }
+
+    public function testUseOfDataProcessor()
+    {
+        $registry = $this->getTestRegistry();
+        $registry->addHandlers(new class implements DataProcessorInterface {
+            public function canProcess(\ReflectionClass $reflection, array $data): bool
+            {
+                return true;
+            }
+
+            public function process(\ReflectionClass $reflection, array $data): array
+            {
+                return (new ScalarTypes())->getBuildData();
+            }
+        });
+        $builder = new ObjectBuilder($registry);
+        $object = $builder->build(ScalarTypes::class);
+        /** @noinspection NullPointerExceptionInspection */
+        $this->assertEquals($object->getExpectedResult(), $object->getActualResult());
     }
 
     /**

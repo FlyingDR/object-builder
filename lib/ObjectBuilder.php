@@ -2,6 +2,7 @@
 
 namespace Flying\ObjectBuilder;
 
+use Flying\ObjectBuilder\Handler\DataProcessor\DataProcessorInterface;
 use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectConstructor\ObjectConstructorInterface;
@@ -40,6 +41,20 @@ class ObjectBuilder implements ObjectBuilderInterface
         // Prepare list of resolved mappings for this class to be cached
         if (!array_key_exists($class, $this->targetsCache)) {
             $this->targetsCache[$class] = [];
+        }
+
+        // Pre-process given object data
+        /** @var DataProcessorInterface[] $processors */
+        $processors = $this->getHandlers(DataProcessorInterface::class);
+        foreach ($processors as $processor) {
+            try {
+                if (!$processor->canProcess($reflection, $data)) {
+                    continue;
+                }
+                $data = $processor->process($reflection, $data);
+            } catch (\Exception $e) {
+                continue;
+            }
         }
 
         $object = null;
