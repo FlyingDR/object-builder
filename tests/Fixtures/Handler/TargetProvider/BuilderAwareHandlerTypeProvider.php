@@ -19,7 +19,7 @@ class BuilderAwareHandlerTypeProvider implements TargetProviderInterface, Object
     /**
      * {@inheritdoc}
      */
-    public function getTarget(\ReflectionClass $reflection, string $name)
+    public function getTarget(\ReflectionClass $reflection, string $name): ?\Reflector
     {
         return null;
     }

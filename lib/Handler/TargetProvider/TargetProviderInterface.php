@@ -23,7 +23,7 @@ interface TargetProviderInterface extends HandlerInterface
      *
      * @param \ReflectionClass $reflection
      * @param string $name
-     * @return \ReflectionMethod|\ReflectionProperty|string|null    String result is treated as method or property name
+     * @return \ReflectionMethod|\ReflectionProperty|null    String result is treated as method or property name
      */
-    public function getTarget(\ReflectionClass $reflection, string $name);
+    public function getTarget(\ReflectionClass $reflection, string $name): ?\Reflector;
 }

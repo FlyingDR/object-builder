@@ -3,6 +3,7 @@
 namespace Flying\ObjectBuilder\Handler\TargetProvider;
 
 use Flying\ObjectBuilder\Handler\PrioritizedHandlerInterface;
+use Flying\ObjectBuilder\ReflectionCache\ReflectionCache;
 
 /**
  * Default implementation of target provider for object builder
@@ -20,9 +21,11 @@ class DefaultTargetProvider implements TargetProviderInterface, PrioritizedHandl
     /**
      * {@inheritdoc}
      */
-    public function getTarget(\ReflectionClass $reflection, string $name)
+    public function getTarget(\ReflectionClass $reflection, string $name): ?\Reflector
     {
-        return 'set' . str_replace(' ', '', ucwords(strtr($name, '_-', '  ')));
+        $method = 'set' . str_replace(' ', '', ucwords(strtr($name, '_-', '  ')));
+        $methods = ReflectionCache::getMethods($reflection);
+        return $methods[$method] ?? null;
     }
 
     /**

@@ -18,7 +18,7 @@ class PrioritizedTypeProvider implements TargetProviderInterface, PrioritizedHan
     /**
      * {@inheritdoc}
      */
-    public function getTarget(\ReflectionClass $reflection, string $name)
+    public function getTarget(\ReflectionClass $reflection, string $name): ?\Reflector
     {
         return null;
     }

@@ -46,8 +46,6 @@ class ObjectBuilder implements ObjectBuilderInterface
         $providers = array_filter($this->getHandlers(TargetProviderInterface::class), function (TargetProviderInterface $provider) use ($reflection) {
             return $provider->canGetTarget($reflection);
         });
-        $methods = ReflectionCache::getMethods($reflection);
-        $properties = ReflectionCache::getProperties($reflection);
 
         $object = new $class();
 
@@ -59,24 +57,12 @@ class ObjectBuilder implements ObjectBuilderInterface
                 foreach ($providers as $provider) {
                     try {
                         $ct = $provider->getTarget($reflection, $key);
+                        if ($ct instanceof \ReflectionMethod || $ct instanceof \ReflectionProperty) {
+                            $target = $ct;
+                            break;
+                        }
                     } catch (\Exception $e) {
                         continue;
-                    }
-                    if ($ct instanceof \ReflectionMethod || $ct instanceof \ReflectionProperty) {
-                        $target = $ct;
-                        break;
-                    }
-                    if (!\is_string($ct)) {
-                        continue;
-                    }
-                    if (array_key_exists($ct, $methods)) {
-                        $target = $methods[$ct];
-                        break;
-                    }
-
-                    if (array_key_exists($ct, $properties)) {
-                        $target = $properties[$ct];
-                        break;
                     }
                 }
                 if (!$target instanceof \Reflector) {

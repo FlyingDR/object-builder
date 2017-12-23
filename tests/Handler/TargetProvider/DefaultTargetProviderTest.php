@@ -3,6 +3,7 @@
 namespace Flying\ObjectBuilder\Tests\Handler\TargetProvider;
 
 use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
+use Flying\ObjectBuilder\Tests\Handler\TargetProvider\Fixtures\TestMethodNamesTransformation;
 use PHPUnit\Framework\TestCase;
 
 class DefaultTargetProviderTest extends TestCase
@@ -14,9 +15,13 @@ class DefaultTargetProviderTest extends TestCase
      */
     public function testTargetProviding(string $name, string $expected)
     {
-        $reflection = new \ReflectionClass(\stdClass::class);
+        $reflection = new \ReflectionClass(TestMethodNamesTransformation::class);
         $provider = new DefaultTargetProvider();
-        $this->assertEquals($expected, $provider->getTarget($reflection, $name));
+        /** @var \ReflectionMethod $method */
+        $method = $provider->getTarget($reflection, $name);
+        $this->assertInstanceOf(\ReflectionMethod::class, $method);
+        /** @noinspection NullPointerExceptionInspection */
+        $this->assertEquals($expected, $method->name);
     }
 
     public function dpNames()
