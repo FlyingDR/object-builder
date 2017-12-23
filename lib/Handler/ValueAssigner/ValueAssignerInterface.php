@@ -6,6 +6,8 @@ use Flying\ObjectBuilder\Handler\HandlerInterface;
 
 /**
  * Interface for value assigners for object builder
+ *
+ * Purpose of the value assigner is to assign given value to given target within given object
  */
 interface ValueAssignerInterface extends HandlerInterface
 {

@@ -6,6 +6,9 @@ use Flying\ObjectBuilder\Handler\HandlerInterface;
 
 /**
  * Interface for type converters for object builder
+ *
+ * Purpose of the type converter handler is to apply any required transformations
+ * to object data entry before it will be assigned to the target
  */
 interface TypeConverterInterface extends HandlerInterface
 {

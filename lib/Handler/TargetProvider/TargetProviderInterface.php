@@ -6,6 +6,9 @@ use Flying\ObjectBuilder\Handler\HandlerInterface;
 
 /**
  * Interface for object builder handlers that are responsible for resolving targets for assigning values to given object
+ *
+ * Purpose of the target provider is to find a target (either method or property) within target object,
+ * object data with given name can be assigned to
  */
 interface TargetProviderInterface extends HandlerInterface
 {
