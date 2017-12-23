@@ -3,6 +3,7 @@
 namespace Flying\ObjectBuilder\Registry;
 
 use Flying\ObjectBuilder\Handler\HandlerInterface;
+use Flying\ObjectBuilder\Handler\ObjectConstructor\ObjectConstructorInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
@@ -10,6 +11,7 @@ use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
 class HandlersRegistry implements HandlersRegistryInterface
 {
     protected static $handlerTypes = [
+        ObjectConstructorInterface::class,
         TargetProviderInterface::class,
         TypeConverterInterface::class,
         ValueAssignerInterface::class,

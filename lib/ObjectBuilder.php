@@ -4,6 +4,7 @@ namespace Flying\ObjectBuilder;
 
 use Flying\ObjectBuilder\Handler\HandlerInterface;
 use Flying\ObjectBuilder\Handler\ObjectBuilderAwareHandlerInterface;
+use Flying\ObjectBuilder\Handler\ObjectConstructor\ObjectConstructorInterface;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\TypeConverterInterface;
 use Flying\ObjectBuilder\Handler\ValueAssigner\ValueAssignerInterface;
@@ -41,13 +42,30 @@ class ObjectBuilder implements ObjectBuilderInterface
             $this->targetsCache[$class] = [];
         }
 
+        $object = null;
+        // Attempt to create object instance
+        /** @var ObjectConstructorInterface[] $constructors */
+        $constructors = $this->getHandlers(ObjectConstructorInterface::class);
+        foreach ($constructors as $constructor) {
+            try {
+                if (!$constructor->canConstruct($reflection, $data)) {
+                    continue;
+                }
+                $instance = $constructor->construct($reflection, $data);
+                if (\is_object($instance) && (\get_class($instance) === $reflection->name || is_subclass_of($instance, $reflection->name))) {
+                    $object = $instance;
+                    break;
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
+        }
+
         // Prepare list target providers that can handle our class
         /** @var TargetProviderInterface[] $providers */
         $providers = array_filter($this->getHandlers(TargetProviderInterface::class), function (TargetProviderInterface $provider) use ($reflection) {
             return $provider->canGetTarget($reflection);
         });
-
-        $object = new $class();
 
         // Assign data to the object
         foreach ($data as $key => $value) {

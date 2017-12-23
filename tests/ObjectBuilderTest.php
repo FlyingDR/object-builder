@@ -2,6 +2,7 @@
 
 namespace Flying\ObjectBuilder\Tests;
 
+use Flying\ObjectBuilder\Handler\ObjectConstructor\DefaultObjectConstructor;
 use Flying\ObjectBuilder\Handler\TargetProvider\DefaultTargetProvider;
 use Flying\ObjectBuilder\Handler\TargetProvider\TargetProviderInterface;
 use Flying\ObjectBuilder\Handler\TypeConverter\ChildObjectConverter;
@@ -211,6 +212,7 @@ class ObjectBuilderTest extends TestCase
     protected function getTestRegistry(): HandlersRegistryInterface
     {
         return new HandlersRegistry([
+            new DefaultObjectConstructor(),
             new DefaultTargetProvider(),
             new DefaultTypeConverter(),
             new DefaultValueAssigner(),
