@@ -38,6 +38,7 @@ class ChildObjectConverter implements TypeConverterInterface, ObjectBuilderAware
 
     /**
      * {@inheritdoc}
+     * @throws NotConvertedException
      */
     public function convert(\Reflector $target, array $data, string $key)
     {

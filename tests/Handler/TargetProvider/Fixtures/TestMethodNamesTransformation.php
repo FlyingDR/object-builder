@@ -2,41 +2,44 @@
 
 namespace Flying\ObjectBuilder\Tests\Handler\TargetProvider\Fixtures;
 
+/**
+ * @see \Flying\ObjectBuilder\Tests\Handler\TargetProvider\DefaultTargetProviderTest::dpNames
+ */
 class TestMethodNamesTransformation
 {
-    public function setSimple()
+    public function setSimple(): void
     {
     }
 
-    public function setDashTest()
+    public function setDashTest(): void
     {
     }
 
-    public function setUnderscoreTest()
+    public function setUnderscoreTest(): void
     {
     }
 
-    public function setHeadUnderscore()
+    public function setHeadUnderscore(): void
     {
     }
 
-    public function setTailUnderscore()
+    public function setTailUnderscore(): void
     {
     }
 
-    public function setMultipleUnderscores()
+    public function setMultipleUnderscores(): void
     {
     }
 
-    public function setMultipleDashes()
+    public function setMultipleDashes(): void
     {
     }
 
-    public function setSnakeCase()
+    public function setSnakeCase(): void
     {
     }
 
-    public function setCamelCase()
+    public function setCamelCase(): void
     {
     }
 }
