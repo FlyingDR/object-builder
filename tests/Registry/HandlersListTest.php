@@ -133,4 +133,18 @@ class HandlersListTest extends TestCase
             $this->assertSame($expected[$index++], $item);
         }
     }
+
+    public function testListItemsAreUnique()
+    {
+        $item = new DefaultTargetProvider();
+        $list = new HandlersList(TargetProviderInterface::class);
+        $list->add($item);
+        $list->add($item);
+        $list->add($item);
+
+        $this->assertFalse($list->isEmpty());
+        $this->assertEquals(1, $list->count());
+        $this->assertTrue($list->contains($item));
+        $this->assertSame($item, $list->toArray()[0]);
+    }
 }

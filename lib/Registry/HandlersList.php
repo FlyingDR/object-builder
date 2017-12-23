@@ -87,8 +87,10 @@ class HandlersList implements HandlersListInterface
      */
     public function add(HandlerInterface $handler): HandlersList
     {
-        $this->handlers[] = $this->validate($handler);
-        $this->update();
+        if (!$this->contains($handler)) {
+            $this->handlers[] = $this->validate($handler);
+            $this->update();
+        }
         return $this;
     }
 
