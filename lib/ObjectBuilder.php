@@ -90,11 +90,15 @@ class ObjectBuilder implements ObjectBuilderInterface
             $class = \get_class($object);
             $reflection = ReflectionCache::getReflection($class);
 
-            // Prepare list target providers that can handle our class
+            // Prepare lists of  handlers of all kinds will be used for building object
             /** @var TargetProviderInterface[] $providers */
             $providers = array_filter($this->getHandlers(TargetProviderInterface::class), function (TargetProviderInterface $provider) use ($reflection) {
                 return $provider->canGetTarget($reflection);
             });
+            /** @var TypeConverterInterface[] $converters */
+            $converters = $this->getHandlers(TypeConverterInterface::class);
+            /** @var ValueAssignerInterface[] $assigners */
+            $assigners = $this->getHandlers(ValueAssignerInterface::class);
 
             // Prepare list of resolved mappings for this class to be cached
             if (!array_key_exists($class, $this->targetsCache)) {
@@ -138,8 +142,6 @@ class ObjectBuilder implements ObjectBuilderInterface
                 }
 
                 // Attempt to convert data value into type that is expected by object, being built
-                /** @var TypeConverterInterface[] $converters */
-                $converters = $this->getHandlers(TypeConverterInterface::class);
                 foreach ($converters as $converter) {
                     try {
                         if (!$converter->canConvert($target, $data, $key)) {
@@ -161,8 +163,6 @@ class ObjectBuilder implements ObjectBuilderInterface
 
                 // Attempt to assign object value to the object
                 $assigned = false;
-                /** @var ValueAssignerInterface[] $assigners */
-                $assigners = $this->getHandlers(ValueAssignerInterface::class);
                 foreach ($assigners as $assigner) {
                     try {
                         if (!$assigner->canAssign($object, $target, $value)) {
